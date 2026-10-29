@@ -78,6 +78,7 @@ GameBoard* game_board = NULL;
 
 // ========= EJERCICIO 1: STRINGS (NO USAR string.h) =========
 
+//Contador de longitud del string
 static int strLength(char* s) {
     int n = 0;
     while (s[n] != '\0') {
@@ -91,13 +92,13 @@ char* strDuplicate(char* src) {
     //       copiar todo y devolver el puntero nuevo.
     int len = strLength(src);
  
-    /* len + 1 para guardar tambien el terminador '\0' */
+    // len + 1 para guardar tambien el terminador '\0'
     char* copy = malloc(len + 1);
     if (copy == NULL) {
-        return NULL;            /* sin memoria: avisamos con NULL */
+        return NULL;            // sin memoria: avisamos con NULL
     }
  
-    /* copiamos caracter a caracter, incluyendo el '\0' final (i == len) */
+    // copiamos caracter a caracter, incluyendo el '\0' final (i == len)
     for (int i = 0; i <= len; i++) {
         copy[i] = src[i];
     }
@@ -121,9 +122,9 @@ int strCompare(char* s1, char* s2) {
     unsigned char c1 = (unsigned char) s1[i];
     unsigned char c2 = (unsigned char) s2[i];
  
-    if (c1 == c2) return 0;     /* ambos '\0': son iguales */
-    if (c1 < c2)  return 1;     /* s1 menor. Cubre el caso prefijo: '\0' < cualquier char */
-    return -1;                  /* s1 mayor */
+    if (c1 == c2) return 0;     // ambos '\0': son iguales
+    if (c1 < c2)  return 1;     // s1 menor. Cubre el caso prefijo: '\0' < cualquier char
+    return -1;                  // s1 mayor
 }
 
 char* strConcatenate(char* src1, char* src2) {
@@ -132,21 +133,21 @@ char* strConcatenate(char* src1, char* src2) {
     int len1 = strLength(src1);
     int len2 = strLength(src2);
  
-    char* result = malloc(len1 + len2 + 1);   /* +1 por el '\0' */
+    char* result = malloc(len1 + len2 + 1);   // +1 por el '\0'
     if (result == NULL) {
-        return NULL;            /* no liberamos nada: el llamador conserva sus strings */
+        return NULL;            // no liberamos nada: el llamador conserva sus strings
     }
  
-    /* primero src1 ... */
+    // primero src1
     for (int i = 0; i < len1; i++) {
         result[i] = src1[i];
     }
-    /* ... despues src2, incluyendo su '\0' final (j == len2) */
+    //despues src2, incluyendo su '\0' final (j == len2)
     for (int j = 0; j <= len2; j++) {
         result[len1 + j] = src2[j];
     }
  
-    /* recien ahora, con todo copiado, liberamos los originales */
+    // recien ahora, con todo copiado, liberamos los originales
     free(src1);
     free(src2);
     return result;
@@ -223,7 +224,38 @@ void gameBoardDelete(GameBoard* board) {
     // TODO: Recorrer y liberar todos los PieceQueueNode.
     // TODO: Recorrer y liberar todos los ParticleNode.
     // TODO: Finalmente, liberar la estructura GameBoard.
-    printf("Función gameBoardDelete no implementada.\n");
+
+    // Si el tablero no existe, no hay nada para liberar
+    if (board == NULL) {
+        return;
+    }
+
+    // Liberar las filas del tablero
+    RowNode* fila = board->first_row;
+    while (fila != NULL) {
+        RowNode* siguiente = fila->next;
+        free(fila);
+        fila = siguiente;
+    }
+
+    // Liberar la cola de PieceQueueNode
+    PieceQueueNode* pieza = board->queue_head;
+    while (pieza != NULL) {
+        PieceQueueNode* siguiente = pieza->next;
+        free(pieza);
+        pieza = siguiente;
+    }
+
+    // Liberar la lista de ParticleNode
+    ParticleNode* particula = board->first_particle;
+    while (particula != NULL) {
+        ParticleNode* siguiente = particula->next;
+        free(particula);
+        particula = siguiente;
+    }
+
+    // Liberar el tablero
+    free(board);
 }
 
 void gameBoardAddParticle(GameBoard* board, float x, float y, int color) {
