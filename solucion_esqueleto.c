@@ -262,7 +262,23 @@ void gameBoardAddParticle(GameBoard* board, float x, float y, int color) {
     // TODO: Crear un ParticleNode con memoria dinámica.
     // TODO: Inicializar x, y, velocidades aleatorias y un life_timer.
     // TODO: Agregarlo al principio de la lista enlazada simple de partículas.
-    printf("Función gameBoardAddParticle no implementada.\n");
+    ParticleNode* nueva = malloc(sizeof(ParticleNode));
+    if (nueva==NULL){
+        return;
+    }
+    // Pedimos memoria y verificamos que no sea NULL
+    //Inicializamos los valores dados
+    nueva->x=x;
+    nueva->y=y;
+    nueva->color=color;
+    //Ahora seteamos los valores Aleatorios, usamos la mismaestructura del juego base
+    nueva->vel_x= ((rand() % 100) / 10.0f) - 5.0f;
+    nueva->vel_y= ((rand() % 50) / -10.0f) - 2.0f;
+    nueva->life_timer= 30 + ((rand()%30));
+    //Asignamos a next el valor de el primero de la lista
+    nueva->next = board->first_particle;
+    // introducimos al principio a Nueva(con el next ya hecho)
+    board->first_particle= nueva;
 }
 
 int gameBoardCheckAndClearLines(GameBoard* board) {
@@ -271,22 +287,104 @@ int gameBoardCheckAndClearLines(GameBoard* board) {
     // TODO: Crear un nuevo RowNode vacío (lleno de ceros).
     // TODO: Insertar el nuevo RowNode en la CABEZA del tablero (board->first_row).
     // TODO: Por cada celda destruida, invocar a gameBoardAddParticle().
-    printf("Función gameBoardCheckAndClearLines no implementada.\n");
-    return 0;
+    //llamamos curr a la primer fila del tablero y prev a null para poder recorrer
+    RowNode* curr = board->first_row;
+    RowNode* prev= NULL;
+    //filas destruidas y actual para conocer la fila en la que estamos
+    int filas = 0;
+    int actual = 0;
+    while (curr != NULL){
+        int llena = 1;// variable para saber si la fila esta llena
+        for (int c = 0; c < GRID_COLS; c++){
+            if (curr->cells[c]==0){
+                llena= 0;
+                break;//si encontramos un 0 la fila no se llena y salimos del for
+            }
+
+            
+        }
+        //si la fila no esta llena avanzamos a la siguiente
+        if(llena==0){
+            prev= curr;
+            curr= curr->next;
+        }
+        //si la fila esta llena, agregamos particulas y la eliminamos
+        else{
+            for (int c = 0; c < GRID_COLS; c++){
+                gameBoardAddParticle(board,
+                    OFFSET_X + c * CELL_SIZE + CELL_SIZE/2,
+                    OFFSET_Y + actual * CELL_SIZE + CELL_SIZE/2,
+                    curr->cells[c]
+                );//agregamos particulas y usamos la misma estructura que el juego base, junto a color de la celda
+            }
+            RowNode* siguiente= curr->next;//guardamos el siguiente
+            if(prev== NULL){
+                board-> first_row= siguiente;//si es la primer fila actualizamos puntero
+             }
+             else{
+                prev->next=siguiente;
+             }//desenlazamos la fila actual
+             free(curr);
+             filas++;
+             curr= siguiente;//avanzamos a la siguiente
+
+
+        }
+        actual++;//incrementamos contador
+    }
+    for (int i = 0; i<filas; i++){//agregamos filas nuevas al principio del tablero
+        RowNode* nueva = malloc(sizeof(RowNode));
+        if (nueva==NULL){
+            break;//Con NULL va a tirar error porque la funcion tiene que devolver un entero por eso el break
+        }//nos permite salir del for y devolver la cantidad de filas destruidas
+        for(int c = 0; c < GRID_COLS; c++){
+            nueva->cells[c]= 0;
+        }
+        nueva->next= board->first_row;
+        board->first_row= nueva;
+        //agregamos la nueva fila al principio del tablero y actualizamos el puntero
+    }
+    return filas;
 }
 
 void gameBoardEnqueuePiece(GameBoard* board, int type) {
     // TODO: Crear un PieceQueueNode con el 'type'.
     // TODO: Insertarlo al final de la cola (queue_tail) y actualizar punteros.
-    printf("Función gameBoardEnqueuePiece no implementada.\n");
+    //pedimos memoria para el nuevo nodo
+    PieceQueueNode* nuevo= malloc(sizeof(PieceQueueNode));
+    if (nuevo==NULL){
+        return;
+    }
+    nuevo->type= type;//asignamos el type
+    nuevo->next= NULL;//asignamos el nexta NULL porque es el ultimo de la cola
+    if (board->queue_head==NULL){//si la cola esta vacia, el head y tail apuntan a lo mismo
+        board->queue_head= nuevo;
+        board->queue_tail= nuevo;
+    }
+    else{//si no esta vacia, el tail apunta al nuevo y actualizamos el tail
+        board->queue_tail->next= nuevo;
+        board->queue_tail=nuevo;
+    }
+
 }
 
 int gameBoardDequeuePiece(GameBoard* board, int* out_type) {
     // TODO: Si la cola está vacía, retornar 0.
     // TODO: Extraer el primer nodo (queue_head).
     // TODO: Guardar el type en la variable out_type, liberar el nodo y actualizar el head.
-    printf("Función gameBoardDequeuePiece no implementada.\n");
-    return 0;
+    //si la cola esta vacía retornamos 0
+    if (board->queue_tail==NULL){
+        return 0;
+    }
+    PieceQueueNode* nodo= board->queue_head;//guardamos el primer nodo
+    *out_type= nodo->type;//guardamos el type
+    board->queue_head= nodo->next;//actualizamos el head
+    if (board->queue_head==NULL){
+        board->queue_tail= NULL;
+    }//si la cola queda vacía actualizamos el tail a NULL
+    free(nodo);
+    return 1;
+
 }
 
 // ========= LOGICA DE DIBUJADO Y COLISIONES (NO MODIFICAR) =========
