@@ -563,8 +563,223 @@ void correrTests() {
     //    gameBoardCheckAndClearLines y comprobar que first_row es la fila nueva vacia y que
     //    la lista sigue teniendo 20 filas.
     // Liberar toda la memoria pedida en los tests (strings y tableros).
-    printf("Tests no implementados.\n");
+    printf("========== TESTS ==========\n\n");
+
+    // ------ strDuplicate ------
+    char *d1 = strDuplicate("");
+    if (strCompare(d1, "") == 0){
+        printf("OK strDuplicate vacio\n");
+    } else {
+        printf("ERROR strDuplicate vacio\n");
+    }
+    free(d1);
+
+    char *d2 = strDuplicate("x");
+    if (strCompare(d2, "x") == 0){
+        printf("OK strDuplicate un caracter\n");
+    } else {
+        printf("ERROR strDuplicate un caracter\n");
+    }
+    free(d2);
+
+    char *d3 = strDuplicate("hola");
+    if (strCompare(d3, "hola") == 0){
+        printf("OK strDuplicate varios caracteres\n");
+    } else {
+        printf("ERROR strDuplicate varios caracteres\n");
+    }
+    free(d3);
+
+    printf("\n");
+
+    // ------ strCompare ------
+
+    if (strCompare("", "") == 0){
+        printf("OK strCompare vacios\n");
+    } else {
+        printf("ERROR strCompare vacios\n");
+    }
+
+    if (strCompare("a", "a") == 0){
+        printf("OK strCompare iguales\n");
+    } else {
+        printf("ERROR strCompare iguales\n");
+    }
+
+    if (strCompare("a", "b") == 1){
+        printf("OK strCompare a<b\n");
+    } else {
+        printf("ERROR strCompare a<b\n");
+    }
+
+    if (strCompare("b", "a") == -1){
+        printf("OK strCompare b>a\n");
+    } else {
+        printf("ERROR strCompare b>a\n");
+    }
+
+    printf("\n");
+
+    // ------ strConcatenate ------
+
+    char *c1 = strDuplicate("");
+    char *c2 = strDuplicate("abc");
+
+    char *r1 = strConcatenate(c1,c2);
+
+    if (strCompare(r1,"abc")==0){
+        printf("OK strConcatenate caso 1\n");
+    } else {
+        printf("ERROR strConcatenate caso 1\n");
+    }
+
+    free(r1);
+
+    c1 = strDuplicate("hola ");
+    c2 = strDuplicate("mundo");
+
+    r1 = strConcatenate(c1,c2);
+
+    if (strCompare(r1,"hola mundo")==0){
+        printf("OK strConcatenate caso 2\n");
+    } else {
+        printf("ERROR strConcatenate caso 2\n");
+    }
+
+    free(r1);
+
+    printf("\n");
+
+    // ------ Tail ------
+
+    GameBoard *board = gameBoardNew();
+
+    for(int i=1;i<=5;i++){
+        gameBoardEnqueuePiece(board,i);
+    }
+    int valor;
+    int ok = 1;
+
+    for(int i=1;i<=5;i++){
+        if(!gameBoardDequeuePiece(board,&valor) || valor!=i){
+            ok=0;
+        }
+    }
+
+    if(ok){
+        printf("OK FIFO\n");
+    } else {
+        printf("ERROR FIFO\n");
+    }
+
+    if(gameBoardDequeuePiece(board,&valor)==0 && board->queue_head==NULL && board->queue_tail==NULL){
+        printf("OK cola vacia\n");
+    } else {
+        printf("ERROR cola vacia\n");
+    }
+
+    gameBoardEnqueuePiece(board,99);
+
+    if(gameBoardDequeuePiece(board,&valor) && valor==99){
+        printf("OK reutilizar cola\n");
+    } else {
+        printf("ERROR reutilizar cola\n");
+    }
+
+    gameBoardDelete(board);
+
+    printf("\n");
+
+    // ------ Llenar artificialmente la ultima fila ------
+
+    board = gameBoardNew();
+
+    RowNode *fila = getRowAt(board,19);
+
+    for(int i=0;i<GRID_COLS;i++){
+        fila->cells[i]=1;
+    }
+    int borradas = gameBoardCheckAndClearLines(board);
+
+    if(borradas==1){
+        printf("OK borrar una fila\n");
+    } else {
+        printf("ERROR borrar una fila\n");
+    }
+
+    int vacia=1;
+
+    for(int i=0;i<GRID_COLS;i++){
+        if(board->first_row->cells[i]!=0){
+            vacia=0;
+        }
+    }
+
+    if(vacia){
+        printf("OK nueva fila vacia\n");
+    }else{
+        printf("ERROR nueva fila vacia\n");
+    }
+
+    int cantidad=0;
+
+    fila=board->first_row;
+
+    while(fila){
+        cantidad++;
+        fila=fila->next;
+    }
+
+    if(cantidad==20){
+        printf("OK sigue habiendo 20 filas\n");
+    } else {
+        printf("ERROR cantidad de filas\n");
+    }
+
+    gameBoardDelete(board);
+
+    printf("\n");
+
+    // ------ LLenar filas 0 y 1 ------
+
+    board = gameBoardNew();
+
+    RowNode *f0 = getRowAt(board,0);
+    RowNode *f1 = getRowAt(board,1);
+
+    for(int i=0;i<GRID_COLS;i++){
+        f0->cells[i]=1;
+        f1->cells[i]=1;
+    }
+
+    borradas = gameBoardCheckAndClearLines(board);
+
+    if(borradas==2){
+        printf("OK borrar dos filas\n");
+    } else {
+        printf("ERROR borrar dos filas\n");
+    }
+
+    cantidad=0;
+
+    fila=board->first_row;
+
+    while(fila){
+        cantidad++;
+        fila=fila->next;
+    }
+
+    if(cantidad==20){
+        printf("OK siguen 20 filas\n");
+    } else {
+        printf("ERROR siguen 20 filas\n");
+    }
+
+    gameBoardDelete(board);
+
+    printf("\n========== FIN TESTS ==========\n");
 }
+
 
 // Compara contra "--test" sin depender de string.h ni del Ejercicio 1.
 int esFlagTest(char* arg) {
